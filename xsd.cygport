@@ -1,0 +1,47 @@
+NAME="xsd"
+VERSION=3.3.0
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="XML Schema to C++ data binding compiler"
+DESCRIPTION="CodeSynthesis XSD is an open-source, cross-platform W3C XML
+Schema to C++ data binding compiler. Provided with an XML instance
+specification (XML Schema), it generates C++ classes that represent the given
+vocabulary as well as parsing and serialization code. You can then access the
+data stored in XML using types and functions that semantically correspond to
+your application domain rather than dealing with the intricacies of reading
+and writing XML."
+HOMEPAGE="http://www.codesynthesis.com/products/xsd/"
+SRC_URI="http://www.codesynthesis.com/download/xsd/${VERSION%.*}/xsd-${VERSION}-2+dep.tar.bz2"
+SRC_DIR="xsd-${VERSION}-2+dep"
+PATCH_URI="http://pkgs.fedoraproject.org/cgit/xsd.git/plain/xsd-3.3.0-xsdcxx-rename.patch"
+
+PKG_NAMES="xsd xsd-doc"
+xsd_CONTENTS="usr/bin/ usr/include/ usr/share/doc/xsd/[FGLNR]* usr/share/man/"
+xsd_doc_CATEGORY="Doc"
+xsd_doc_CONTENTS="usr/share/doc/xsd/*/ usr/share/doc/xsd/*.*"
+
+src_compile() {
+	lndirs
+	cd ${B}
+	cygmake \
+		fs.l="/usr/lib/libboost_filesystem-mt.dll.a /usr/lib/libboost_system-mt.dll.a" \
+		re.l=/usr/lib/libboost_regex-mt.dll.a \
+		xerces_c.l=/usr/lib/libxerces-c.dll.a
+}
+
+src_install() {
+	cd ${B}
+	cygmake install install_prefix=${D}/usr \
+		fs.l="/usr/lib/libboost_filesystem-mt.dll.a /usr/lib/libboost_system-mt.dll.a" \
+		re.l=/usr/lib/libboost_regex-mt.dll.a \
+		xerces_c.l=/usr/lib/libxerces-c.dll.a
+	# avoid collision with mono
+	mv ${D}/usr/bin/xsd{,cxx}.exe
+	mv ${D}/usr/share/man/man1/xsd{,cxx}.1
+	# remove MSVC-specific headers
+	rm -fr ${D}/usr/include/xsd/cxx/compilers/vc-*
+	# clean up docs
+	rm -fr ${D}/usr/share/doc/libxsd/
+	find ${D}/usr/share/doc/xsd/ -name '*.ps' -o -name '*.doxygen' \
+	     -o -name 'makefile' -delete
+}
