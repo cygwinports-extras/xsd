@@ -1,6 +1,6 @@
 NAME="xsd"
 VERSION=4.0.0
-RELEASE=1
+RELEASE=2
 CATEGORY="Devel"
 SUMMARY="XML Schema to C++ data binding compiler"
 DESCRIPTION="CodeSynthesis XSD is an open-source, cross-platform W3C XML
@@ -28,15 +28,14 @@ src_compile() {
 	cygmake \
 		boost_sources= \
 		expat_sources= \
-		xerces_c.l="/usr/lib/libxerces-c.dll.a /usr/lib/libboost_regex.dll.a /usr/lib/libexpat.dll.a"
+		xerces_c.l="-lxerces-c -lboost_regex -lexpat"
 }
 
 src_install() {
 	cd ${B}
 	cygmake install install_prefix=${D}/usr \
 		boost_sources= \
-		expat_sources= \
-		xerces_c.l="/usr/lib/libxerces-c.dll.a /usr/lib/libboost_regex.dll.a /usr/lib/libexpat.dll.a"
+		expat_sources=
 	# avoid collision with mono
 	mv ${D}/usr/bin/xsd{,cxx}.exe
 	mv ${D}/usr/share/man/man1/xsd{,cxx}.1
