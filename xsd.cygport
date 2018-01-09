@@ -1,6 +1,6 @@
 NAME="xsd"
 VERSION=4.0.0
-RELEASE=4
+RELEASE=5
 CATEGORY="Devel"
 SUMMARY="XML Schema to C++ data binding compiler"
 DESCRIPTION="CodeSynthesis XSD is an open-source, cross-platform W3C XML
