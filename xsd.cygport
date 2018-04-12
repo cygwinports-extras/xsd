@@ -1,6 +1,6 @@
 NAME="xsd"
 VERSION=4.0.0
-RELEASE=5
+RELEASE=6
 CATEGORY="Devel"
 SUMMARY="XML Schema to C++ data binding compiler"
 DESCRIPTION="CodeSynthesis XSD is an open-source, cross-platform W3C XML
@@ -13,7 +13,10 @@ and writing XML."
 HOMEPAGE="http://www.codesynthesis.com/products/xsd/"
 SRC_URI="http://www.codesynthesis.com/download/xsd/${VERSION%.*}/xsd-${VERSION}+dep.tar.bz2"
 SRC_DIR="xsd-${VERSION}+dep"
-PATCH_URI="http://pkgs.fedoraproject.org/cgit/xsd.git/plain/xsd-3.3.0-xsdcxx-rename.patch"
+PATCH_URI="
+	http://src.fedoraproject.org/cgit/xsd.git/plain/xsd-3.3.0-xsdcxx-rename.patch
+	4.0.0-libcutl-boost-cygwin.patch
+"
 
 PKG_NAMES="xsd xsd-doc"
 xsd_CONTENTS="usr/bin/ usr/include/ usr/share/doc/xsd/[FGLNR]* usr/share/man/"
@@ -23,18 +26,17 @@ xsd_doc_CONTENTS="usr/share/doc/xsd/*/ usr/share/doc/xsd/*.*"
 src_compile() {
 	lndirs
 	cd ${B}
-	CXXFLAGS+=" -DLIBCUTL_EXTERNAL_BOOST -DLIBCUTL_EXTERNAL_EXPAT"
+	# -DLIBCUTL_EXTERNAL_BOOST not compatible with 1.65+
+	CXXFLAGS+=" -std=gnu++98 -DLIBCUTL_EXTERNAL_EXPAT -Wno-deprecated"
 	# xsd doesn't use cutl::xml, so libexpat will not be a runtime dep
 	cygmake \
-		boost_sources= \
 		expat_sources= \
-		xerces_c.l="-lxerces-c -lboost_regex -lexpat"
+		xerces_c.l="-lxerces-c -lexpat"
 }
 
 src_install() {
 	cd ${B}
 	cygmake install install_prefix=${D}/usr \
-		boost_sources= \
 		expat_sources=
 	# avoid collision with mono
 	mv ${D}/usr/bin/xsd{,cxx}.exe

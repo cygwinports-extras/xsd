@@ -1,0 +1,145 @@
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/config/platform/cygwin.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/config/platform/cygwin.hpp	2018-04-11 20:15:43.052773700 -0500
+@@ -11,6 +11,7 @@
+ #define BOOST_HAS_DIRENT_H
+ #define BOOST_HAS_LOG1P
+ #define BOOST_HAS_EXPM1
++#define BOOST_HAS_NANOSLEEP
+ 
+ //
+ // Threading API:
+@@ -35,24 +36,10 @@
+ // find out if we have a stdint.h, there should be a better way to do this:
+ //
+ #include <sys/types.h>
+-#ifdef _STDINT_H
+ #define BOOST_HAS_STDINT_H
+-#endif
+-
+-/// Cygwin has no fenv.h
+-#define BOOST_NO_FENV_H
+ 
+ // boilerplate code:
+ #include <cutl/details/boost/config/posix_features.hpp>
+ 
+-//
+-// Cygwin lies about XSI conformance, there is no nl_types.h:
+-//
+-#ifdef BOOST_HAS_NL_TYPES_H
+-#  undef BOOST_HAS_NL_TYPES_H
+-#endif
+- 
+-
+-
+ 
+ 
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/config/stdlib/libstdcpp3.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/config/stdlib/libstdcpp3.hpp	2018-04-11 20:16:08.019884200 -0500
+@@ -72,7 +72,7 @@
+ #endif
+ 
+ // Apple doesn't seem to reliably defined a *unix* macro
+-#if !defined(CYGWIN) && (  defined(__unix__)  \
++#if (  defined(__unix__)  \
+                         || defined(__unix)    \
+                         || defined(unix)      \
+                         || defined(__APPLE__) \
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/cstdint.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/cstdint.hpp	2018-04-11 20:18:30.613524900 -0500
+@@ -55,15 +55,6 @@
+ #   include <inttypes.h>
+ # else
+ #   include <stdint.h>
+-
+-// There is a bug in Cygwin two _C macros
+-#   if defined(__STDC_CONSTANT_MACROS) && defined(__CYGWIN__)
+-#     undef INTMAX_C
+-#     undef UINTMAX_C
+-#     define INTMAX_C(c) c##LL
+-#     define UINTMAX_C(c) c##ULL
+-#   endif
+-
+ # endif
+ 
+ #ifdef __QNX__
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/detail/interlocked.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/detail/interlocked.hpp	2018-04-11 20:18:58.146252700 -0500
+@@ -125,7 +125,7 @@ extern "C" void* __cdecl _InterlockedExc
+ # define BOOST_INTERLOCKED_EXCHANGE _InterlockedExchange
+ # define BOOST_INTERLOCKED_EXCHANGE_ADD _InterlockedExchangeAdd
+ 
+-#elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __CYGWIN__ )
++#elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ )
+ 
+ #if defined(__MINGW64__)
+ #define BOOST_INTERLOCKED_IMPORT
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/regex/v4/fileiter.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/regex/v4/fileiter.hpp	2018-04-11 20:17:28.729768000 -0500
+@@ -28,11 +28,7 @@
+ 
+ #ifndef BOOST_REGEX_NO_FILEITER
+ 
+-#if (defined(__CYGWIN__) || defined(__CYGWIN32__)) && !defined(BOOST_REGEX_NO_W32)
+-#error "Sorry, can't mix <windows.h> with STL code and gcc compiler: if you ran configure, try again with configure --disable-ms-windows"
+-#define BOOST_REGEX_FI_WIN32_MAP
+-#define BOOST_REGEX_FI_POSIX_DIR
+-#elif (defined(__WIN32__) || defined(_WIN32) || defined(WIN32)) && !defined(BOOST_REGEX_NO_W32)
++#if (defined(__WIN32__) || defined(_WIN32) || defined(WIN32)) && !defined(BOOST_REGEX_NO_W32)
+ #define BOOST_REGEX_FI_WIN32_MAP
+ #define BOOST_REGEX_FI_WIN32_DIR
+ #else
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/atomic_count.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/atomic_count.hpp	2018-04-11 20:21:33.624375100 -0500
+@@ -95,7 +95,7 @@ typedef long atomic_count;
+ #elif defined( __GNUC__ ) && ( defined( __i386__ ) || defined( __x86_64__ ) )
+ #  include <cutl/details/boost/smart_ptr/detail/atomic_count_gcc_x86.hpp>
+ 
+-#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
++#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+ #  include <cutl/details/boost/smart_ptr/detail/atomic_count_win32.hpp>
+ 
+ #elif defined( BOOST_SP_HAS_SYNC )
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/lightweight_mutex.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/lightweight_mutex.hpp	2018-04-11 20:21:42.589401400 -0500
+@@ -32,7 +32,7 @@
+ #  include <cutl/details/boost/smart_ptr/detail/lwm_nop.hpp>
+ #elif defined(BOOST_HAS_PTHREADS)
+ #  include <cutl/details/boost/smart_ptr/detail/lwm_pthreads.hpp>
+-#elif defined(BOOST_HAS_WINTHREADS) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
++#elif defined(BOOST_HAS_WINTHREADS) || defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+ #  include <cutl/details/boost/smart_ptr/detail/lwm_win32_cs.hpp>
+ #else
+ // Use #define BOOST_DISABLE_THREADS to avoid the error
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/sp_counted_base.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/sp_counted_base.hpp	2018-04-11 20:22:01.050917600 -0500
+@@ -62,7 +62,7 @@
+ #elif defined(__GNUC__) && ( defined( __sparcv9 ) || ( defined( __sparcv8 ) && ( __GNUC__ * 100 + __GNUC_MINOR__ >= 402 ) ) )
+ # include <cutl/details/boost/smart_ptr/detail/sp_counted_base_gcc_sparc.hpp>
+ 
+-#elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined(__CYGWIN__)
++#elif defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ )
+ # include <cutl/details/boost/smart_ptr/detail/sp_counted_base_w32.hpp>
+ 
+ #elif defined( _AIX )
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/spinlock.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/spinlock.hpp	2018-04-11 20:21:48.407056300 -0500
+@@ -40,7 +40,7 @@
+ #elif defined( BOOST_SP_HAS_SYNC )
+ #  include <cutl/details/boost/smart_ptr/detail/spinlock_sync.hpp>
+ 
+-#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__CYGWIN__)
++#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+ #  include <cutl/details/boost/smart_ptr/detail/spinlock_w32.hpp>
+ 
+ #elif defined(BOOST_HAS_PTHREADS)
+--- origsrc/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/yield_k.hpp	2014-07-16 03:03:14.000000000 -0500
++++ src/xsd-4.0.0+dep/libcutl/cutl/details/boost/smart_ptr/detail/yield_k.hpp	2018-04-11 20:22:14.164560600 -0500
+@@ -42,7 +42,7 @@ extern "C" void _mm_pause();
+ 
+ //
+ 
+-#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __CYGWIN__ )
++#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ )
+ 
+ #if defined( BOOST_USE_WINDOWS_H )
+ # include <windows.h>
